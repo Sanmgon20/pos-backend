@@ -13,7 +13,9 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('users')
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users') // La ruta base será http://localhost:3000/users
 export class UsersController {

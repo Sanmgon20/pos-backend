@@ -1,8 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from 'node_modules/@nestjs/typeorm/dist/typeorm.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { UsersModule } from './users/users.module';
+import { ProductsModule } from './products/products.module';
+import { Product } from './products/entities/product.entity';
 
 
 @Module({
@@ -10,11 +12,12 @@ import { UsersModule } from './users/users.module';
     TypeOrmModule.forRoot({
   type: 'better-sqlite3',
   database: 'Commerce.db',
-  entities: [User],
-  synchronize: false,
+  entities: [User,Product],
+  synchronize: true,
   logging: true,
 }),
 UsersModule,
+ProductsModule,
   ],
   controllers: [],
   providers: [],
