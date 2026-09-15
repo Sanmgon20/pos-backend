@@ -14,6 +14,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { Product } from './entities/product.entity';
 
 @ApiTags('products')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -23,34 +24,34 @@ export class ProductsController {
 
   // 1. POST /Products (Crear producto)
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
+    return await this.productsService.create(createProductDto);
   }
 
   // 2. GET /products (Listar todos los productos)
   @Get()
-  findAll() {
+  findAll(): Promise<Product[]> {
     return this.productsService.findAll();
   }
 
   // 3. GET /products/1 (Buscar producto por ID)
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.findOne(id);
+  @Get(':termino')
+  async findOne(@Param('termino') termino: string): Promise<Product> {
+    return await this.productsService.findOne(termino);
   }
 
   // 4. PATCH /products/1 (Actualizar producto por ID)
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
-  ) {
-    return this.productsService.update(id, updateProductDto);
+  ): Promise<Product> {
+    return await this.productsService.update(id, updateProductDto);
   }
 
   // 5. DELETE /product/1 (Eliminar producto por ID)
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return await this.productsService.remove(id);
   }
 }
