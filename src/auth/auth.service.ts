@@ -20,25 +20,35 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { legajo, name, password, rol } = registerDto;
-    const existingUser = await this.userRepository.findOne({
-      where: { legajo },
-    });
-    if (existingUser) {
+    // 1. Validar que el legajo exista en la petición y sea un número válido
+    const legajoParsed = Number(registerDto.legajo);
+
+    if (!registerDto.legajo || isNaN(legajoParsed)) {
       throw new BadRequestException(
-        'El legajo ya está registrado en la base de datos',
+        'El legajo es obligatorio y debe ser un número válido.',
       );
     }
 
-    // 2. Hashear la contraseña con bcrypt (10 salt rounds)
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 2. Usar la variable validada para la búsqueda en TypeORM
+    const existingUser = await this.userRepository.findOne({
+      where: { legajo: legajoParsed },
+    });
 
-    // 3. Crear y guardar el usuario
+    if (existingUser) {
+      throw new BadRequestException(
+        'El legajo ya está registrado en el sistema.',
+      );
+    }
+
+    // 3. Hashear la contraseña
+    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+
+    // 4. Crear y guardar el usuario
     const newUser = this.userRepository.create({
-      legajo,
-      name,
+      legajo: legajoParsed,
+      name: registerDto.name,
       password: hashedPassword,
-      rol,
+      rol: registerDto.rol || 'CASHIER',
       activo: 1,
     });
 
@@ -53,17 +63,46 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const { legajo, password } = loginDto; // O si usás email/legajo según tu LoginDto
+    const legajo = Number(loginDto.legajo);
+    const { password } = loginDto;
+
+    console.log('--- INTENTO DE LOGIN ---');
+    console.log(
+      '1. Legajo recibido (parseado):',
+      legajo,
+      'Tipo:',
+      typeof legajo,
+    );
+    console.log('2. Password recibida:', `"${password}"`);
 
     const user = await this.userRepository.findOne({ where: { legajo } });
+
     if (!user) {
+      console.log('❌ RESULTADO: Usuario NO encontrado en la base de datos.');
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    console.log('3. Usuario encontrado en DB:', {
+      id: user.id,
+      legajo: user.legajo,
+      name: user.name,
+    });
+    console.log(
+      '4. Hash guardado en DB:',
+      user.password,
+      'Largo del hash:',
+      user.password?.length,
+    );
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('5. ¿Resultado de bcrypt.compare?:', isPasswordValid);
+
     if (!isPasswordValid) {
+      console.log('❌ RESULTADO: Contraseña incorrecta.');
       throw new UnauthorizedException('Credenciales inválidas');
     }
+
+    console.log('✅ RESULTADO: Login exitoso!');
 
     const payload = { sub: user.id, legajo: user.legajo, rol: user.rol };
 

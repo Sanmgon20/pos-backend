@@ -20,7 +20,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: JwtPayload) {
-    // Lo que retornes acá se inyecta automáticamente en req.user
-    return { userId: payload.sub, legajo: payload.legajo, rol: payload.rol };
+    return {
+      userId: payload.sub,
+      legajo: payload.legajo,
+      rol: payload.rol, // <--- Usamos 'rol' igual que en tu entidad
+    };
   }
 }

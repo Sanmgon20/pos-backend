@@ -20,8 +20,7 @@ export class User {
   @Column()
   name!: string;
 
-  @Column()
-  @Exclude()
+  @Column({ type: 'varchar', length: 255 })
   password!: string;
 
   @Column()
