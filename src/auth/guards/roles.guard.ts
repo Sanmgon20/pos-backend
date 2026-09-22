@@ -19,9 +19,11 @@ export class RolesGuard implements CanActivate {
     // Le indicamos a TypeScript la estructura esperada de la Request con su propiedad user
     const request = context
       .switchToHttp()
-      .getRequest<{ user?: { role: string } }>();
+      .getRequest<{ user?: { role?: string; rol?: string } }>();
     const user = request.user;
 
-    return requiredRoles.includes(user?.role ?? '');
+    return requiredRoles.some(
+      (role) => user?.rol === role || user?.role === role,
+    );
   }
 }
